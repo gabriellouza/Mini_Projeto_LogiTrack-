@@ -1,0 +1,43 @@
+flowchart TB
+    subgraph internet[Internet]
+        user[Operadores e Motoristas]
+    end
+
+    subgraph cloud[Provedor Cloud]
+        waf[WAF / API Gateway]
+        web[Static Web App]
+
+        subgraph containers[Containers Gerenciados]
+            api[API Backend]
+            route[Route Engine]
+            adapter[Map Provider Adapter]
+            worker[Event Worker]
+        end
+
+        broker[(Broker Gerenciado)]
+        redis[(Redis Gerenciado)]
+        postgres[(PostgreSQL Gerenciado)]
+        obs[Logs, Métricas e Tracing]
+        secrets[Secrets Manager]
+    end
+
+    maps[Google Maps]
+    osm[OpenStreetMap]
+
+    user --> web
+    web --> waf
+    waf --> api
+    api --> route
+    route --> adapter
+    adapter --> maps
+    adapter --> osm
+    adapter --> redis
+    api --> postgres
+    worker --> postgres
+    broker --> worker
+    api --> obs
+    route --> obs
+    adapter --> obs
+    worker --> obs
+    api --> secrets
+    adapter --> secrets

@@ -1,0 +1,37 @@
+sequenceDiagram
+    actor Operador
+    participant Web as Web App
+    participant Gateway as API Gateway
+    participant API as API Backend
+    participant Route as Route Engine
+    participant Adapter as Map Provider Adapter
+    participant Maps as Google Maps
+    participant OSM as OpenStreetMap
+    participant Cache as Redis Cache
+    participant DB as PostgreSQL
+
+    Operador->>Web: solicita recálculo de rota
+    Web->>Gateway: POST /routes/recalculate
+    Gateway->>API: encaminha requisição validada
+    API->>Route: solicita cálculo
+    Route->>Adapter: calcular rota via IMapProvider
+    Adapter->>Maps: consulta provedor primário
+    alt Google Maps disponível
+        Maps-->>Adapter: rota calculada
+        Adapter->>Cache: salva rota recente
+    else Falha ou timeout
+        Adapter->>OSM: usa provedor secundário
+        alt OSM disponível
+            OSM-->>Adapter: rota calculada
+            Adapter->>Cache: salva rota recente
+        else Provedores indisponíveis
+            Adapter->>Cache: busca última rota válida
+            Cache-->>Adapter: rota em modo degradado
+        end
+    end
+    Adapter-->>Route: rota final
+    Route->>DB: persiste histórico
+    Route-->>API: resposta do recálculo
+    API-->>Gateway: resultado
+    Gateway-->>Web: resultado
+    Web-->>Operador: exibe rota atualizada

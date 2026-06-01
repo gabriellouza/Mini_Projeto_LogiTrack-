@@ -1,0 +1,46 @@
+flowchart LR
+    operador[Operador Logístico]
+    motorista[Motorista]
+    cliente[Cliente Corporativo]
+
+    subgraph cloud[Ambiente Cloud - LogiTrack]
+        gateway[API Gateway]
+        web[Web App]
+        api[API Backend]
+        route[Route Engine]
+        adapter[Map Provider Adapter]
+        worker[Event Worker]
+        broker[(Message Broker)]
+        cache[(Redis Cache)]
+        db[(PostgreSQL)]
+        obs[Observabilidade]
+    end
+
+    maps[Google Maps]
+    osm[OpenStreetMap]
+    erp[ERP]
+    notif[SMS / Push]
+    gps[GPS Veículos]
+
+    operador --> web
+    motorista --> web
+    web --> gateway
+    gateway --> api
+    api --> route
+    route --> adapter
+    adapter --> maps
+    adapter --> osm
+    adapter --> cache
+    api --> db
+    route --> db
+    gps --> broker
+    broker --> worker
+    worker --> api
+    api --> erp
+    api --> notif
+    notif --> cliente
+    notif --> motorista
+    api --> obs
+    route --> obs
+    adapter --> obs
+    worker --> obs
